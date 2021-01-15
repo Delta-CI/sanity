@@ -1,3 +1,6 @@
+machine:
+  vcpu: 4
+  mem_mb: 16000 # RAM in MBs
 jobs:
   'Lint':
     docker: deltacidocker/node:12
