@@ -32,13 +32,15 @@ jobs:
           # Allow running the Sanity CLI tool without specifying absolute path
           # $GITHUB_PATH
           export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-
-      - name: Test sanity build command
+      - name: Test sanity init command
         run: |
-          # Test building the test studio with all customizations
+          # Test initializing a project in unattended mode
           export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-          cd /__ci/work/examples/test-studio
-          sanity build -y
+          rm -rf /tmp/test-project
+          cd /tmp
+          sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
+
+
 
       - name: Test all
         parallel: true
@@ -52,11 +54,10 @@ jobs:
               # Test building the project with latest dependencies
               sanity build --skip-minify
 
-
-          - name: Test sanity init command
+          - name: Test sanity build command
             run: |
-              # Test initializing a project in unattended mode
+              # Test building the test studio with all customizations
               export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-              rm -rf /tmp/test-project
-              cd /tmp
-              sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
+              cd /__ci/work/examples/test-studio
+              sanity build -y
+
