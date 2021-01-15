@@ -7,24 +7,14 @@ jobs:
         when.changed: '**/package*.json' #
       - name: Build modules
         run: npm run build
-      # - name: Lint changed files
-      #   run: |
-      #     # Is this a pull request?
-      #     if [ $GITHUB_BASE_REF ]; then
-      #       # If it is - compare against the base branch
-      #       # $GITHUB_BASE_REF is the branch you're merging *to*
-      #       git fetch origin $GITHUB_BASE_REF --depth=1
-      #       COMPARE_WITH=origin/$GITHUB_BASE_REF
-      #       CHANGED_FILES=$( git diff --name-only $COMPARE_WITH $GITHUB_SHA --diff-filter ACMRTUXB )
-      #       printf "\nThese files have changed between $COMPARE_WITH and $GITHUB_SHA:\n$CHANGED_FILES\n"
-      #     else
-      #       # If not it's a commit, check the files changed in this commit
-      #       git fetch origin $GITHUB_SHA --depth=2
-      #       CHANGED_FILES=$( git diff-tree --no-commit-id --name-only --diff-filter ACMRTUXB -r $GITHUB_SHA )
-      #       printf "\nThese files have changed in $GITHUB_SHA:\n$CHANGED_FILES\n"
-      #     fi
-      #     # Don't include files like LICENSE and css files
-      #     CHANGED_JS_FILES=$(echo "$CHANGED_FILES" | sed -e '/^.\+\(mjs\|tsx\|jsx\|js\|ts\)$/!d')
-      #     for FILE_NAME in $CHANGED_JS_FILES
-      #     do
-      #       npm run eslint -- $FILE_NAME
+      - name: Lint changed files #
+        run: |
+          # If not it's a commit, check the files changed in this commit
+          git fetch origin $GITHUB_SHA --depth=2
+          CHANGED_FILES=$( git diff-tree --no-commit-id --name-only --diff-filter ACMRTUXB -r $GITHUB_SHA )
+          printf "\nThese files have changed in $GITHUB_SHA:\n$CHANGED_FILES\n"
+          # Don't include files like LICENSE and css files
+          CHANGED_JS_FILES=$(echo "$CHANGED_FILES" | sed -e '/^.\+\(mjs\|tsx\|jsx\|js\|ts\)$/!d')
+          for FILE_NAME in $CHANGED_JS_FILES
+          do
+            npm run eslint -- $FILE_NAME
