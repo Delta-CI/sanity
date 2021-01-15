@@ -37,7 +37,7 @@ jobs:
         run: |
           # Test building the test studio with all customizations
           export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-          cd /__ci/examples/test-studio
+          cd /__ci/work/examples/test-studio
           sanity build -y
 
       - name: Test sanity init command
