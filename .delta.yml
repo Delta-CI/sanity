@@ -33,26 +33,29 @@ jobs:
           # $GITHUB_PATH
           export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
 
-      - name: Test sanity build command
-        run: |
-          # Test building the test studio with all customizations
-          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-          cd /__ci/work/examples/test-studio
-          sanity build -y
+      - name: Test all
+        parallel: true
+        sub_steps:
+          - name: Test build with new code
+            run: |
+              # Use the newly commited changes instead of the latest dependencies from NPM
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              cd /tmp/test-project
+              /__ci/work/scripts/symlinkDependencies.js .
+              # Test building the project with latest dependencies
+              sanity build --skip-minify
 
-      - name: Test sanity init command
-        run: |
-          # Test initializing a project in unattended mode
-          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-          rm -rf /tmp/test-project
-          cd /tmp
-          sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
+          - name: Test sanity build command
+            run: |
+              # Test building the test studio with all customizations
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              cd /__ci/work/examples/test-studio
+              sanity build -y
 
-      - name: Test build with new code
-        run: |
-          # Use the newly commited changes instead of the latest dependencies from NPM
-          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-          cd /tmp/test-project
-          /__ci/work/scripts/symlinkDependencies.js .
-          # Test building the project with latest dependencies
-          sanity build --skip-minify
+          - name: Test sanity init command
+            run: |
+              # Test initializing a project in unattended mode
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              rm -rf /tmp/test-project
+              cd /tmp
+              sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
