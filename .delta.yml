@@ -1,6 +1,6 @@
 jobs:
   'Lint':
-    docker: ubuntu:latest
+    docker: deltacidocker/node:12
     steps:
       - name: Install npm
         run: npm ci
