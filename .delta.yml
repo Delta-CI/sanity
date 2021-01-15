@@ -7,7 +7,61 @@ jobs:
         when.changed: '**/package*.json' #
       - name: Build modules
         run: npm run build
-  'Test':
+  'Test(node10)':
+    docker: deltacidocker/node:10
+    steps:
+      - name: Install npm deps
+        run: npm i
+
+      - name: Build modules
+        run: npm run build
+
+      - name: Test individual modules
+        run: npx lerna run test --concurrency 2 --stream
+
+      - name: Build CLI
+        run: |
+          # Build CLI to a single file
+          cd packages/@sanity/cli
+          npm run pack
+
+          # Remove source and dependencies from CLI to ensure it works standalone
+          rm -rf packages/@sanity/cli/node_modules
+          rm -rf packages/@sanity/cli/src && rm -rf packages/@sanity/cli/lib
+
+          # Allow running the Sanity CLI tool without specifying absolute path
+          # $GITHUB_PATH
+          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+      - name: Test sanity init command
+        run: |
+          # Test initializing a project in unattended mode
+          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+          rm -rf /tmp/test-project
+          cd /tmp
+          sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
+
+
+
+      - name: Test all
+        parallel: true
+        sub_steps:
+          - name: Test build with new code
+            run: |
+              # Use the newly commited changes instead of the latest dependencies from NPM
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              cd /tmp/test-project
+              /__ci/work/scripts/symlinkDependencies.js .
+              # Test building the project with latest dependencies
+              sanity build --skip-minify
+
+          - name: Test sanity build command
+            run: |
+              # Test building the test studio with all customizations
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              cd /__ci/work/examples/test-studio
+              sanity build -y
+
+  'Test(node12)':
     docker: deltacidocker/node:12
     steps:
       - name: Install npm deps
@@ -61,3 +115,56 @@ jobs:
               cd /__ci/work/examples/test-studio
               sanity build -y
 
+  'Test(node14)':
+    docker: deltacidocker/node:14
+    steps:
+      - name: Install npm deps
+        run: npm i
+
+      - name: Build modules
+        run: npm run build
+
+      - name: Test individual modules
+        run: npx lerna run test --concurrency 2 --stream
+
+      - name: Build CLI
+        run: |
+          # Build CLI to a single file
+          cd packages/@sanity/cli
+          npm run pack
+
+          # Remove source and dependencies from CLI to ensure it works standalone
+          rm -rf packages/@sanity/cli/node_modules
+          rm -rf packages/@sanity/cli/src && rm -rf packages/@sanity/cli/lib
+
+          # Allow running the Sanity CLI tool without specifying absolute path
+          # $GITHUB_PATH
+          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+      - name: Test sanity init command
+        run: |
+          # Test initializing a project in unattended mode
+          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+          rm -rf /tmp/test-project
+          cd /tmp
+          sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
+
+
+
+      - name: Test all
+        parallel: true
+        sub_steps:
+          - name: Test build with new code
+            run: |
+              # Use the newly commited changes instead of the latest dependencies from NPM
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              cd /tmp/test-project
+              /__ci/work/scripts/symlinkDependencies.js .
+              # Test building the project with latest dependencies
+              sanity build --skip-minify
+
+          - name: Test sanity build command
+            run: |
+              # Test building the test studio with all customizations
+              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+              cd /__ci/work/examples/test-studio
+              sanity build -y
