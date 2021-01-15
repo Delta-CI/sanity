@@ -44,6 +44,7 @@ jobs:
         run: |
           # Test initializing a project in unattended mode
           export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+          rm -rf /tmp/test-project
           cd /tmp
           sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
 
