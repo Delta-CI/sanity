@@ -1,8 +1,5 @@
 jobs:
   'Lint':
-    machine:
-      vcpu: 4
-      mem_mb: 16000 # RAM in MBs
     docker: deltacidocker/node:12
     steps:
       - name: Install npm
@@ -10,10 +7,16 @@ jobs:
         when.changed: '**/package*.json' #
       - name: Build modules
         run: npm run build
+
+  'Verify Format':
+    docker: deltacidocker/node:12
+    steps:
+      - name: Install npm dependencies
+        run: npm install --ignore-scripts
+      - name: Verify format
+        run: npm run verify-format
+
   'Test(node10)':
-    machine:
-      vcpu: 4
-      mem_mb: 16000 # RAM in MBs
     docker: deltacidocker/node:10
     env:
       CI: true
@@ -71,9 +74,6 @@ jobs:
 
   'Test(node12)':
     docker: deltacidocker/node:12
-    machine:
-      vcpu: 4
-      mem_mb: 16000 # RAM in MBs
     env:
       CI: true
     steps:
@@ -130,9 +130,6 @@ jobs:
 
   'Test(node14)':
     docker: deltacidocker/node:14
-    machine:
-      vcpu: 4
-      mem_mb: 16000 # RAM in MBs
     env:
       CI: true
     steps:
