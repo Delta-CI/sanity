@@ -3,7 +3,7 @@ jobs:
     docker: deltacidocker/node:12
     steps:
       - name: Install npm
-        run: npm ci
+        run: npm i
         when.changed: '**/package*.json' #
       - name: Build modules
         run: npm run build
