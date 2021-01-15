@@ -9,6 +9,8 @@ jobs:
         run: npm run build
   'Test(node10)':
     docker: deltacidocker/node:10
+    env:
+      CI: true
     steps:
       - name: Install npm deps
         run: npm i
@@ -63,6 +65,8 @@ jobs:
 
   'Test(node12)':
     docker: deltacidocker/node:12
+    env:
+      CI: true
     steps:
       - name: Install npm deps
         run: npm i
@@ -117,6 +121,8 @@ jobs:
 
   'Test(node14)':
     docker: deltacidocker/node:14
+    env:
+      CI: true
     steps:
       - name: Install npm deps
         run: npm i
