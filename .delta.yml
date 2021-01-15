@@ -33,6 +33,13 @@ jobs:
           # $GITHUB_PATH
           export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
 
+      - name: Test sanity build command
+        run: |
+          # Test building the test studio with all customizations
+          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+          cd /__ci/work/examples/test-studio
+          sanity build -y
+
       - name: Test all
         parallel: true
         sub_steps:
@@ -45,12 +52,6 @@ jobs:
               # Test building the project with latest dependencies
               sanity build --skip-minify
 
-          - name: Test sanity build command
-            run: |
-              # Test building the test studio with all customizations
-              export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
-              cd /__ci/work/examples/test-studio
-              sanity build -y
 
           - name: Test sanity init command
             run: |
