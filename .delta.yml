@@ -7,14 +7,48 @@ jobs:
         when.changed: '**/package*.json' #
       - name: Build modules
         run: npm run build
-      - name: Lint changed files #
+  'Test':
+    docker: deltacidocker/node:12
+    steps:
+      - name: Install npm deps
+        run: npm i
+
+      - name: Build modules
+        run: npm run build
+
+      - name: Test individual modules
+        run: npx lerna run test --concurrency 2 --stream
+
+      - name: Build CLI
         run: |
-          # If not it's a commit, check the files changed in this commit
-          git fetch origin $GITHUB_SHA --depth=2
-          CHANGED_FILES=$( git diff-tree --no-commit-id --name-only --diff-filter ACMRTUXB -r $GITHUB_SHA )
-          printf "\nThese files have changed in $GITHUB_SHA:\n$CHANGED_FILES\n"
-          # Don't include files like LICENSE and css files
-          CHANGED_JS_FILES=$(echo "$CHANGED_FILES" | sed -e '/^.\+\(mjs\|tsx\|jsx\|js\|ts\)$/!d')
-          for FILE_NAME in $CHANGED_JS_FILES
-          do
-            npm run eslint -- $FILE_NAME
+          # Build CLI to a single file
+          cd packages/@sanity/cli
+          npm run pack
+
+          # Remove source and dependencies from CLI to ensure it works standalone
+          rm -rf packages/@sanity/cli/node_modules
+          rm -rf packages/@sanity/cli/src && rm -rf packages/@sanity/cli/lib
+
+          # Allow running the Sanity CLI tool without specifying absolute path
+          # $GITHUB_PATH
+          export PATH=$PATH:/__ci/work/packages/@sanity/cli/bin
+
+      - name: Test sanity build command
+        run: |
+          # Test building the test studio with all customizations
+          cd /__ci/examples/test-studio
+          sanity build -y
+
+      - name: Test sanity init command
+        run: |
+          # Test initializing a project in unattended mode
+          cd /tmp
+          sanity init -y --project=ppsg7ml5 --dataset=test --output-path=/tmp/test-project
+
+      - name: Test build with new code
+        run: |
+          # Use the newly commited changes instead of the latest dependencies from NPM
+          cd /tmp/test-project
+          /__ci/work/scripts/symlinkDependencies.js .
+          # Test building the project with latest dependencies
+          sanity build --skip-minify
